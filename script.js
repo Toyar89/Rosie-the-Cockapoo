@@ -4,7 +4,6 @@ const videoScreen = document.getElementById("videoScreen");
 const endedScreen = document.getElementById("endedScreen");
 
 const startBtn = document.getElementById("startBtn");
-const testRingBtn = document.getElementById("testRingBtn");
 const answerBtn = document.getElementById("answerBtn");
 const declineBtn = document.getElementById("declineBtn");
 const endBtn = document.getElementById("endBtn");
@@ -15,7 +14,6 @@ const video = document.getElementById("rosieVideo");
 const ringtone = document.getElementById("ringtone");
 const timer = document.getElementById("timer");
 const recipientLine = document.getElementById("recipientLine");
-const ringStatus = document.getElementById("ringStatus");
 
 let interval = null;
 let seconds = 0;
@@ -183,7 +181,7 @@ function backToIncoming(event) {
   playRingtone();
 }
 
-testRingBtn.addEventListener("pointerdown", testRingtone);
+
 startBtn.addEventListener("pointerdown", startIncoming);
 answerBtn.addEventListener("pointerdown", answerCall);
 declineBtn.addEventListener("pointerdown", declineCall);
