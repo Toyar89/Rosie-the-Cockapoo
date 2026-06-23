@@ -1,99 +1,154 @@
-const incomingScreen=document.getElementById('incomingScreen');
-const videoScreen=document.getElementById('videoScreen');
-const endedScreen=document.getElementById('endedScreen');
+const startScreen = document.getElementById("startScreen");
+const incomingScreen = document.getElementById("incomingScreen");
+const videoScreen = document.getElementById("videoScreen");
+const endedScreen = document.getElementById("endedScreen");
 
-const answerBtn=document.getElementById('answerBtn');
-const declineBtn=document.getElementById('declineBtn');
-const endBtn=document.getElementById('endBtn');
-const replayBtn=document.getElementById('replayBtn');
-const resetBtn=document.getElementById('resetBtn');
+const startBtn = document.getElementById("startBtn");
+const answerBtn = document.getElementById("answerBtn");
+const declineBtn = document.getElementById("declineBtn");
+const endBtn = document.getElementById("endBtn");
+const replayBtn = document.getElementById("replayBtn");
+const resetBtn = document.getElementById("resetBtn");
 
-const video=document.getElementById('rosieVideo');
-const ringtone=document.getElementById('ringtone');
-const timer=document.getElementById('timer');
-const recipientLine=document.getElementById('recipientLine');
+const video = document.getElementById("rosieVideo");
+const ringtone = document.getElementById("ringtone");
+const timer = document.getElementById("timer");
+const recipientLine = document.getElementById("recipientLine");
 
-let interval;
-let seconds=0;
-let ringtoneEnabled=true;
+let interval = null;
+let seconds = 0;
 
-const params=new URLSearchParams(window.location.search);
-const name=params.get('name');
-if(name){
-  recipientLine.textContent=`Special message for ${name}`;
+const params = new URLSearchParams(window.location.search);
+const name = params.get("name");
+
+if (name) {
+  recipientLine.textContent = `Special message for ${name}`;
+  document.title = `Rosie is calling ${name}`;
 }
 
-function show(screen){
-  [incomingScreen,videoScreen,endedScreen].forEach(s=>s.classList.remove('active'));
-  screen.classList.add('active');
+function show(screen) {
+  [startScreen, incomingScreen, videoScreen, endedScreen].forEach(item => item.classList.remove("active"));
+  screen.classList.add("active");
 }
 
-function startTimer(){
-  clearInterval(interval);
-  seconds=0;
-  timer.textContent='00:00';
-  interval=setInterval(()=>{
-    seconds++;
-    const m=String(Math.floor(seconds/60)).padStart(2,'0');
-    const s=String(seconds%60).padStart(2,'0');
-    timer.textContent=`${m}:${s}`;
-  },1000);
+function formatTime(value) {
+  const mins = String(Math.floor(value / 60)).padStart(2, "0");
+  const secs = String(value % 60).padStart(2, "0");
+  return `${mins}:${secs}`;
 }
 
-function stopRingtone(){
-  ringtoneEnabled=false;
-  ringtone.pause();
-  ringtone.currentTime=0;
+function startTimer() {
+  stopTimer();
+  seconds = 0;
+  timer.textContent = "00:00";
+
+  interval = setInterval(() => {
+    seconds += 1;
+    timer.textContent = formatTime(seconds);
+  }, 1000);
 }
 
-async function startRingtone(){
-  if(!ringtoneEnabled) return;
-  try{
-    ringtone.volume=0.65;
+function stopTimer() {
+  if (interval) {
+    clearInterval(interval);
+    interval = null;
+  }
+}
+
+async function playRingtone() {
+  if (!ringtone) return;
+
+  try {
+    ringtone.src = "ringtone-ios.mp3";
+    ringtone.loop = true;
+    ringtone.muted = false;
+    ringtone.volume = 0.65;
+    ringtone.currentTime = 0;
     await ringtone.play();
-  }catch(e){}
+  } catch (error) {
+    console.log("Ringtone could not play. Check the filename ringtone-ios.mp3.");
+  }
 }
 
-async function answerCall(e){
-  if(e){e.preventDefault();e.stopPropagation();}
+function stopRingtone() {
+  if (!ringtone) return;
+
+  ringtone.pause();
+  ringtone.currentTime = 0;
+  ringtone.muted = true;
+}
+
+async function startIncoming(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  show(incomingScreen);
+  await playRingtone();
+}
+
+async function answerCall(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
   stopRingtone();
   show(videoScreen);
   startTimer();
-  try{
-    video.currentTime=0;
+
+  try {
+    video.removeAttribute("controls");
+    video.currentTime = 0;
+    video.muted = false;
     await video.play();
-  }catch(e){}
+  } catch (error) {
+    video.setAttribute("controls", "controls");
+  }
 }
 
-function endCall(e){
-  if(e){e.preventDefault();e.stopPropagation();}
-  clearInterval(interval);
+function declineCall(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  stopRingtone();
+  show(endedScreen);
+}
+
+function endCall(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  stopTimer();
   stopRingtone();
   video.pause();
   show(endedScreen);
 }
 
-function declineCall(e){
-  if(e){e.preventDefault();e.stopPropagation();}
+function backToIncoming(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  stopTimer();
   stopRingtone();
-  show(endedScreen);
-}
-
-answerBtn.addEventListener('pointerdown',answerCall);
-declineBtn.addEventListener('pointerdown',declineCall);
-endBtn.addEventListener('pointerdown',endCall);
-replayBtn.addEventListener('pointerdown',answerCall);
-
-resetBtn.addEventListener('pointerdown',(e)=>{
-  e.preventDefault();
-  clearInterval(interval);
   video.pause();
-  video.currentTime=0;
-  ringtoneEnabled=true;
-  ringtone.load();
+  video.currentTime = 0;
   show(incomingScreen);
-  startRingtone();
-});
+  playRingtone();
+}
 
-window.addEventListener('load',startRingtone);
-video.addEventListener('ended',endCall);
+startBtn.addEventListener("pointerdown", startIncoming);
+answerBtn.addEventListener("pointerdown", answerCall);
+declineBtn.addEventListener("pointerdown", declineCall);
+endBtn.addEventListener("pointerdown", endCall);
+replayBtn.addEventListener("pointerdown", answerCall);
+resetBtn.addEventListener("pointerdown", backToIncoming);
+
+video.addEventListener("ended", endCall);
