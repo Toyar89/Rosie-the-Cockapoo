@@ -4,6 +4,7 @@ const videoScreen = document.getElementById("videoScreen");
 const endedScreen = document.getElementById("endedScreen");
 
 const startBtn = document.getElementById("startBtn");
+const testRingBtn = document.getElementById("testRingBtn");
 const answerBtn = document.getElementById("answerBtn");
 const declineBtn = document.getElementById("declineBtn");
 const endBtn = document.getElementById("endBtn");
@@ -14,9 +15,11 @@ const video = document.getElementById("rosieVideo");
 const ringtone = document.getElementById("ringtone");
 const timer = document.getElementById("timer");
 const recipientLine = document.getElementById("recipientLine");
+const ringStatus = document.getElementById("ringStatus");
 
 let interval = null;
 let seconds = 0;
+const ringtoneFile = "ringtone-ios.mp3";
 
 const params = new URLSearchParams(window.location.search);
 const name = params.get("name");
@@ -55,18 +58,40 @@ function stopTimer() {
   }
 }
 
+async function checkRingtoneFile() {
+  try {
+    const response = await fetch(ringtoneFile, { cache: "no-store" });
+    if (!response.ok) {
+      ringStatus.textContent = `Ringtone not found: ${ringtoneFile}`;
+      return false;
+    }
+    ringStatus.textContent = `Ringtone found: ${ringtoneFile}`;
+    return true;
+  } catch (error) {
+    ringStatus.textContent = `Could not check ringtone file.`;
+    return false;
+  }
+}
+
 async function playRingtone() {
-  if (!ringtone) return;
+  if (!ringtone) return false;
+
+  const exists = await checkRingtoneFile();
+  if (!exists) return false;
 
   try {
-    ringtone.src = "ringtone-ios.mp3";
+    ringtone.pause();
+    ringtone.src = ringtoneFile + "?v=" + Date.now();
     ringtone.loop = true;
     ringtone.muted = false;
-    ringtone.volume = 0.65;
+    ringtone.volume = 1;
     ringtone.currentTime = 0;
     await ringtone.play();
+    ringStatus.textContent = "Ringtone playing.";
+    return true;
   } catch (error) {
-    console.log("Ringtone could not play. Check the filename ringtone-ios.mp3.");
+    ringStatus.textContent = "Ringtone blocked or unsupported. Try tapping Test Ringtone again.";
+    return false;
   }
 }
 
@@ -76,6 +101,20 @@ function stopRingtone() {
   ringtone.pause();
   ringtone.currentTime = 0;
   ringtone.muted = true;
+}
+
+async function testRingtone(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  await playRingtone();
+
+  setTimeout(() => {
+    stopRingtone();
+    ringStatus.textContent = "Ringtone test stopped.";
+  }, 2500);
 }
 
 async function startIncoming(event) {
@@ -144,6 +183,7 @@ function backToIncoming(event) {
   playRingtone();
 }
 
+testRingBtn.addEventListener("pointerdown", testRingtone);
 startBtn.addEventListener("pointerdown", startIncoming);
 answerBtn.addEventListener("pointerdown", answerCall);
 declineBtn.addEventListener("pointerdown", declineCall);
@@ -152,3 +192,4 @@ replayBtn.addEventListener("pointerdown", answerCall);
 resetBtn.addEventListener("pointerdown", backToIncoming);
 
 video.addEventListener("ended", endCall);
+checkRingtoneFile();

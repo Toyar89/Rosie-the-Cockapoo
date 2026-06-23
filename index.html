@@ -15,6 +15,10 @@
         <img class="caller-photo small" src="rosie-photo.png" alt="Rosie" />
         <h1>Rosie</h1>
         <p>Tap below to start Rosie’s incoming call.</p>
+
+        <button id="testRingBtn" class="ghost-btn">Test Ringtone</button>
+        <p id="ringStatus" class="status-line">Ringtone file expected: ringtone-ios.mp3</p>
+
         <button id="startBtn" class="wide-btn">Start Incoming Call</button>
       </div>
     </section>
@@ -82,7 +86,7 @@
     </div>
   </div>
 
-  <audio id="ringtone" src="ringtone-ios.mp3" preload="auto" loop></audio>
+  <audio id="ringtone" preload="auto" loop></audio>
 
   <script src="script.js"></script>
 </body>
