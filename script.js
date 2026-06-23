@@ -15,7 +15,7 @@ const recipientLine = document.getElementById("recipientLine");
 
 let interval = null;
 let seconds = 0;
-let ringtoneAllowed = true;
+let callAnswered = false;
 
 const params = new URLSearchParams(window.location.search);
 const name = params.get("name");
@@ -55,34 +55,35 @@ function stopTimer() {
 }
 
 async function startRingtone() {
-  if (!ringtoneAllowed || !incomingScreen.classList.contains("active")) return;
-  if (!ringtone || !ringtone.paused) return;
+  if (!ringtone || callAnswered) return;
+  if (!incomingScreen.classList.contains("active")) return;
 
   try {
-    ringtone.currentTime = 0;
+    ringtone.muted = false;
     ringtone.volume = 0.65;
+    ringtone.currentTime = 0;
     await ringtone.play();
   } catch (error) {
-    // Some phones block sound until a tap. That's okay.
+    // Many mobile browsers block audio before interaction.
+    // This is normal and safer than letting it start during the video.
   }
 }
 
-function stopRingtone() {
-  ringtoneAllowed = false;
+function hardStopRingtone() {
+  callAnswered = true;
 
   if (!ringtone) return;
 
   ringtone.pause();
-  ringtone.currentTime = 0;
   ringtone.muted = true;
+  ringtone.volume = 0;
 
-  setTimeout(() => {
-    if (!incomingScreen.classList.contains("active")) {
-      ringtone.pause();
-      ringtone.currentTime = 0;
-      ringtone.muted = true;
-    }
-  }, 250);
+  try {
+    ringtone.currentTime = 0;
+  } catch (error) {}
+
+  ringtone.removeAttribute("src");
+  ringtone.load();
 }
 
 async function answerCall(event) {
@@ -91,7 +92,8 @@ async function answerCall(event) {
     event.stopPropagation();
   }
 
-  stopRingtone();
+  hardStopRingtone();
+
   show(videoScreen);
   startTimer();
 
@@ -105,6 +107,16 @@ async function answerCall(event) {
   }
 }
 
+function declineCall(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  hardStopRingtone();
+  show(endedScreen);
+}
+
 function endCall(event) {
   if (event) {
     event.preventDefault();
@@ -112,49 +124,42 @@ function endCall(event) {
   }
 
   stopTimer();
-  stopRingtone();
+  hardStopRingtone();
   video.pause();
   show(endedScreen);
 }
 
-answerBtn.addEventListener("click", answerCall);
-answerBtn.addEventListener("touchend", answerCall, { passive: false });
+answerBtn.addEventListener("pointerdown", answerCall);
+declineBtn.addEventListener("pointerdown", declineCall);
+endBtn.addEventListener("pointerdown", endCall);
 
-declineBtn.addEventListener("click", (event) => {
+replayBtn.addEventListener("pointerdown", answerCall);
+
+resetBtn.addEventListener("pointerdown", (event) => {
   event.preventDefault();
   event.stopPropagation();
-  stopRingtone();
-  show(endedScreen);
-});
 
-declineBtn.addEventListener("touchend", (event) => {
-  event.preventDefault();
-  event.stopPropagation();
-  stopRingtone();
-  show(endedScreen);
-}, { passive: false });
-
-endBtn.addEventListener("click", endCall);
-endBtn.addEventListener("touchend", endCall, { passive: false });
-
-replayBtn.addEventListener("click", answerCall);
-
-resetBtn.addEventListener("click", () => {
   stopTimer();
   video.pause();
   video.currentTime = 0;
 
+  // Rebuild the ringtone only when returning to the incoming screen.
   if (ringtone) {
+    ringtone.src = "ringtone-ios.mp3";
+    ringtone.loop = true;
     ringtone.muted = false;
-    ringtone.currentTime = 0;
+    ringtone.volume = 0.65;
   }
 
-  ringtoneAllowed = true;
+  callAnswered = false;
   show(incomingScreen);
   startRingtone();
 });
 
-incomingScreen.addEventListener("click", startRingtone);
-incomingScreen.addEventListener("touchstart", startRingtone, { passive: true });
+// Important:
+// No click/touch listener on the incoming screen.
+// That was causing the ringtone to start when tapping Answer.
+
+window.addEventListener("load", startRingtone);
 
 video.addEventListener("ended", endCall);
