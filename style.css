@@ -1,6 +1,4 @@
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 html, body {
   margin: 0;
@@ -10,9 +8,7 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
-body {
-  overflow: hidden;
-}
+body { overflow: hidden; }
 
 .app {
   min-height: 100svh;
@@ -29,9 +25,7 @@ body {
   overflow: hidden;
 }
 
-.screen.active {
-  display: flex;
-}
+.screen.active { display: flex; }
 
 .bg-photo {
   position: absolute;
@@ -43,8 +37,7 @@ body {
   transform: scale(1.05);
 }
 
-.incoming,
-.ended {
+.incoming, .ended {
   align-items: center;
   justify-content: center;
   padding: 28px;
@@ -59,11 +52,9 @@ body {
   z-index: 2;
   font-size: 17px;
   opacity: 0.88;
-  letter-spacing: 0.2px;
 }
 
-.caller-card,
-.ended-card {
+.caller-card, .ended-card {
   position: relative;
   z-index: 2;
   width: min(100%, 390px);
@@ -89,14 +80,8 @@ body {
 }
 
 @keyframes softPulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 24px 60px rgba(0,0,0,0.48);
-  }
-  50% {
-    transform: scale(1.035);
-    box-shadow: 0 28px 72px rgba(255,255,255,0.16);
-  }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.035); }
 }
 
 h1 {
@@ -106,9 +91,7 @@ h1 {
   letter-spacing: -1.5px;
 }
 
-p {
-  margin: 0;
-}
+p { margin: 0; }
 
 #recipientLine {
   font-size: 18px;
@@ -117,7 +100,7 @@ p {
 
 .button-row {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   bottom: 76px;
   left: 0;
   right: 0;
@@ -135,6 +118,7 @@ p {
   justify-items: center;
   font: inherit;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .round-btn span {
@@ -152,13 +136,8 @@ p {
   opacity: 0.8;
 }
 
-.answer span {
-  background: #20c863;
-}
-
-.decline span {
-  background: #f04444;
-}
+.answer span { background: #20c863; }
+.decline span { background: #f04444; }
 
 .tiny-note {
   position: absolute;
@@ -181,10 +160,13 @@ video {
   height: 100svh;
   object-fit: cover;
   background: black;
+  position: relative;
+  z-index: 1;
 }
 
 .video-overlay.top {
   position: absolute;
+  z-index: 5;
   top: 0;
   left: 0;
   right: 0;
@@ -194,7 +176,7 @@ video {
   align-items: center;
   background: linear-gradient(rgba(0,0,0,0.72), transparent);
   font-weight: 700;
-  letter-spacing: 0.2px;
+  pointer-events: none;
 }
 
 #timer {
@@ -204,7 +186,8 @@ video {
 
 .end-call {
   position: absolute;
-  bottom: 28px;
+  z-index: 10;
+  bottom: max(28px, env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   border: none;
@@ -216,6 +199,7 @@ video {
   padding: 16px 34px;
   box-shadow: 0 18px 36px rgba(0,0,0,0.42);
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .ended-card {
@@ -238,8 +222,7 @@ video {
   margin-bottom: 24px;
 }
 
-.wide-btn,
-.ghost-btn {
+.wide-btn, .ghost-btn {
   width: min(100%, 310px);
   border: none;
   border-radius: 999px;
@@ -247,6 +230,7 @@ video {
   font-size: 17px;
   font-weight: 750;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .wide-btn {
@@ -271,14 +255,10 @@ footer {
   opacity: 0.58;
 }
 
-.desktop-warning {
-  display: none;
-}
+.desktop-warning { display: none; }
 
 @media (min-width: 700px) {
-  .app {
-    display: none;
-  }
+  .app { display: none; }
 
   .desktop-warning {
     min-height: 100vh;
@@ -288,10 +268,6 @@ footer {
     text-align: center;
     background: #111;
     color: white;
-  }
-
-  .desktop-warning div {
-    max-width: 420px;
   }
 }
 
