@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Rosie Video Call</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<section id="incomingScreen" class="screen active">
+  <img class="bg" src="rosie-photo.png" alt="">
+  <div class="top">Incoming video call...</div>
+
+  <div class="card">
+    <img class="photo" src="rosie-photo.png" alt="Rosie">
+    <h1>Rosie</h1>
+    <p id="recipientLine">Special message</p>
+  </div>
+
+  <div class="buttons">
+    <button id="declineBtn" class="btn red">✕<small>Decline</small></button>
+    <button id="answerBtn" class="btn green">✓<small>Answer</small></button>
+  </div>
+</section>
+
+<section id="videoScreen" class="screen">
+  <video id="rosieVideo" playsinline preload="auto">
+    <source src="rosie-message.mp4" type="video/mp4">
+  </video>
+
+  <div class="overlay">
+    <span>Rosie</span>
+    <span id="timer">00:00</span>
+  </div>
+
+  <button id="endBtn" class="end">End Call</button>
+</section>
+
+<section id="endedScreen" class="screen">
+  <img class="bg" src="rosie-photo.png" alt="">
+  <div class="card">
+    <img class="photo small" src="rosie-photo.png" alt="Rosie">
+    <h1>Call Ended</h1>
+    <p>Rosie has finished her message.</p>
+    <button id="replayBtn" class="wide">Replay Message</button>
+    <button id="resetBtn" class="wide ghost">Back to Incoming Call</button>
+  </div>
+</section>
+
+<audio id="ringtone" src="ringtone-ios.mp3" preload="auto" loop></audio>
+
+<script src="script.js"></script>
+</body>
+</html>
