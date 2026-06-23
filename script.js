@@ -15,7 +15,7 @@ const recipientLine = document.getElementById("recipientLine");
 
 let interval = null;
 let seconds = 0;
-let ringtoneStarted = false;
+let ringtoneAllowed = true;
 
 const params = new URLSearchParams(window.location.search);
 const name = params.get("name");
@@ -55,26 +55,42 @@ function stopTimer() {
 }
 
 async function startRingtone() {
-  if (!ringtone || ringtoneStarted) return;
+  if (!ringtoneAllowed || !incomingScreen.classList.contains("active")) return;
+  if (!ringtone || !ringtone.paused) return;
 
   try {
     ringtone.currentTime = 0;
     ringtone.volume = 0.65;
     await ringtone.play();
-    ringtoneStarted = true;
   } catch (error) {
-    // Some mobile browsers block audio until the first tap.
+    // Some phones block sound until a tap. That's okay.
   }
 }
 
 function stopRingtone() {
+  ringtoneAllowed = false;
+
   if (!ringtone) return;
+
   ringtone.pause();
   ringtone.currentTime = 0;
-  ringtoneStarted = false;
+  ringtone.muted = true;
+
+  setTimeout(() => {
+    if (!incomingScreen.classList.contains("active")) {
+      ringtone.pause();
+      ringtone.currentTime = 0;
+      ringtone.muted = true;
+    }
+  }, 250);
 }
 
-async function answerCall() {
+async function answerCall(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
   stopRingtone();
   show(videoScreen);
   startTimer();
@@ -89,7 +105,12 @@ async function answerCall() {
   }
 }
 
-function endCall() {
+function endCall(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
   stopTimer();
   stopRingtone();
   video.pause();
@@ -97,30 +118,42 @@ function endCall() {
 }
 
 answerBtn.addEventListener("click", answerCall);
+answerBtn.addEventListener("touchend", answerCall, { passive: false });
 
-declineBtn.addEventListener("click", () => {
+declineBtn.addEventListener("click", (event) => {
+  event.preventDefault();
+  event.stopPropagation();
   stopRingtone();
   show(endedScreen);
 });
 
-endBtn.addEventListener("click", endCall);
-endBtn.addEventListener("touchend", (event) => {
+declineBtn.addEventListener("touchend", (event) => {
   event.preventDefault();
-  endCall();
+  event.stopPropagation();
+  stopRingtone();
+  show(endedScreen);
 }, { passive: false });
+
+endBtn.addEventListener("click", endCall);
+endBtn.addEventListener("touchend", endCall, { passive: false });
 
 replayBtn.addEventListener("click", answerCall);
 
 resetBtn.addEventListener("click", () => {
   stopTimer();
-  stopRingtone();
   video.pause();
   video.currentTime = 0;
+
+  if (ringtone) {
+    ringtone.muted = false;
+    ringtone.currentTime = 0;
+  }
+
+  ringtoneAllowed = true;
   show(incomingScreen);
   startRingtone();
 });
 
-window.addEventListener("load", startRingtone);
 incomingScreen.addEventListener("click", startRingtone);
 incomingScreen.addEventListener("touchstart", startRingtone, { passive: true });
 
