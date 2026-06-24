@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Incoming Video Call from Rosie</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="app">
+
+<section id="startScreen" class="screen start-screen active">
+  <img class="bg-photo" src="rosie-photo.jpeg" alt="">
+  <div class="start-card">
+    <img class="caller-photo small" src="rosie-photo.jpeg" alt="Rosie">
+    <h1>Rosie</h1>
+    <p>Rosie has a special message for you.</p>
+    <button class="wide-btn" onclick="startIncoming(event)">Start Incoming Call</button>
+  </div>
+</section>
+
+<section id="incomingScreen" class="screen incoming">
+  <img class="bg-photo" src="rosie-photo.jpeg" alt="">
+  <div class="fake-status"><span>9:41</span><span>▮▮▮ Wi‑Fi 🔋</span></div>
+  <div class="caller-card incoming-card">
+    <h1>Rosie</h1>
+    <p id="recipientLine">is calling you 🐾</p>
+    <img class="caller-photo large" src="rosie-photo.jpeg" alt="Rosie">
+  </div>
+  <div class="button-row">
+    <button class="round-btn decline" onclick="declineCall(event)" aria-label="Decline call"><span>☎</span><small>Decline</small></button>
+    <button class="round-btn answer" onclick="answerCall(event)" aria-label="Answer call"><span>☎</span><small>Answer</small></button>
+  </div>
+</section>
+
+<section id="videoScreen" class="screen video-screen">
+  <video id="rosieVideo" playsinline preload="auto">
+    <source src="rosie-message.mp4" type="video/mp4">
+  </video>
+  <div class="video-overlay top"><span>Rosie</span><span id="timer">00:00</span></div>
+  <button class="end-call" onclick="endCall(event)">End Call</button>
+</section>
+
+<section id="endedScreen" class="screen ended">
+  <img class="bg-photo" src="rosie-photo.jpeg" alt="">
+  <div class="ended-card">
+    <img class="caller-photo small" src="rosie-photo.jpeg" alt="Rosie">
+    <h1>Call Ended</h1>
+    <p>Rosie has finished her message and returned to important dog business.</p>
+    <button class="wide-btn" onclick="answerCall(event)">Replay Message</button>
+    <button class="ghost-btn" onclick="backToStart(event)">Back to Start</button>
+  </div>
+  <footer>Made with paws for Rosie & Kev</footer>
+</section>
+
+</main>
+
+<div class="desktop-warning">
+  <div>
+    <h1>Open this on a smartphone</h1>
+    <p>This Rosie call page is designed for portrait phone screens only.</p>
+  </div>
+</div>
+
+<audio id="ringtone" src="ringtone-ios.mp3" preload="auto" loop></audio>
+<script src="script.js"></script>
+</body>
+</html>
